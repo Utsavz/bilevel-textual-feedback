@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Reinforcement Learning with Textual Feedback via Natural Language Actor Critic (Bi-NAC) - Bilevel natural language actor-critic for verifiable rewards">
+  <meta name="keywords" content="LLM, reasoning, reinforcement learning, RLVR, textual feedback, natural language critic, actor-critic, bilevel optimization, GRPO">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bi-NAC: Reinforcement Learning with Textual Feedback</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+    :root {
+      --primary: #363636;
+      --primary-light: #4a4a4a;
+      --text-dark: #1f2937;
+      --text-muted: #6b7280;
+      --bg-white: #ffffff;
+      --bg-gray: #f9fafb;
+      --border-light: #e5e7eb;
+    }
+    
+    body { color: var(--text-dark); }
+    
+    .hero { background: #f3f4f6; border-bottom: 1px solid #e5e7eb; overflow: visible !important; }
+    .hero .hero-body { padding-top: 2rem; padding-bottom: 0.8rem; overflow: visible !important; }
+    .hero * { overflow: visible !important; }
+    .hero .container, .hero .columns, .hero .column { overflow: visible !important; max-height: none !important; }
+    .hero .title.is-1 { color: #16a34a; font-weight: 400; font-family: Georgia, 'Times New Roman', serif; }
+    .hero .publication-authors a { color: #374151 !important; }
+    .hero .publication-authors a:hover { color: #C41230 !important; text-decoration: underline; }
+    .hero .publication-authors span { color: #4b5563; }
+    
+    .publication-links .button {
+      margin: 0.25rem;
+      background: transparent;
+      border: 1px solid #d1d5db;
+      color: #374151;
+    }
+    .publication-links .button:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+      color: #1f2937;
+    }
+
+    /* Section titles */
+    h2.section-title,
+    h3.section-title,
+    h4.subsection-title,
+    .title.section-title {
+      color: var(--primary) !important;
+      font-weight: 600;
+      font-family: 'Google Sans', sans-serif;
+      margin-bottom: 1.5rem;
+    }
+    
+    h4.subsection-title {
+      font-size: 1.25rem;
+      font-family: 'Google Sans', sans-serif;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Body text */
+    .content p, .content li {
+      font-family: 'Noto Sans', sans-serif;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    
+    .section-white { background: var(--bg-white); }
+    .section-gray { background: var(--bg-gray); }
+    
+    .insight-box {
+      background: #fafafa;
+      border: 1px solid var(--border-light);
+      border-left: 4px solid #9ca3af;
+      padding: 1.5rem 2rem;
+      border-radius: 4px;
+      margin: 1.5rem 0;
+    }
+    .insight-box p {
+      font-family: 'Castoro', Georgia, serif;
+      font-size: 1.1rem;
+    }
+    
+    .math-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    @media (max-width: 768px) { .math-comparison { grid-template-columns: 1fr; } }
+    
+    .math-box {
+      background: #fff;
+      border-radius: 6px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-light);
+    }
+    .math-box.rl { border-top: 3px solid #dc2626; }
+    .math-box.ml { border-top: 3px solid var(--primary); }
+    .math-box h4 { font-weight: 600; margin-bottom: 1rem; color: var(--text-dark); }
+    
+    .figure-container {
+      background: transparent;
+      border-radius: 0;
+      padding: 1rem 0;
+      border: none;
+      margin: 1.5rem 0;
+    }
+    .figure-container img { border-radius: 4px; }
+    .figure-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
+    
+    /* Equal height for analysis figures */
+    .analysis-columns {
+      display: flex;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+    .analysis-columns .analysis-col {
+      flex: 1;
+      display: flex;
+    }
+    .analysis-columns .figure-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+    }
+    .analysis-columns .figure-container .img-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .analysis-columns .figure-container img {
+      max-width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+    }
+    @media (max-width: 768px) {
+      .analysis-columns { flex-direction: column; }
+    }
+    
+    .result-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-light);
+    }
+    .result-card h4 { color: var(--text-dark); font-weight: 600; margin-bottom: 1rem; }
+    
+    .highlight-stat {
+      background: var(--primary);
+      color: #fff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .algorithm-box {
+      background: #1f2937;
+      color: #e5e7eb;
+      border-radius: 6px;
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+    }
+    .algorithm-box .comment { color: #9ca3af; }
+    .algorithm-box .keyword { color: #f472b6; }
+    .algorithm-box .function { color: #60a5fa; }
+    
+    table.comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    table.comparison-table th {
+      background: var(--primary);
+      color: #fff !important;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    table.comparison-table th * { color: #fff !important; }
+    table.comparison-table th .katex, table.comparison-table th .katex * { color: #fff !important; }
+    table.comparison-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); }
+    table.comparison-table tr:last-child td { border-bottom: none; }
+    table.comparison-table tr:hover td { background: var(--bg-gray); }
+    
+    pre code { display: block; padding: 1rem; background: #1f2937; color: #e5e7eb; border-radius: 6px; overflow-x: auto; }
+    .bibtex-box { 
+      background: #374151;
+      border: 1px solid #4b5563;
+      border-radius: 8px; 
+      padding: 1.5rem;
+    }
+    .bibtex-box pre {
+      margin: 0;
+      background: transparent;
+    }
+    .bibtex-box code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #e5e7eb;
+      background: transparent;
+      padding: 0;
+    }
+    
+    footer.footer { background: #1f2937; color: #9ca3af; padding: 2rem; overflow: hidden; }
+    footer.footer .columns { margin: 0; }
+    footer.footer .container { overflow: hidden; }
+    footer a { color: #93c5fd; }
+    footer a:hover { color: #bfdbfe; }
+    
+    .emoji-icon { margin-right: 0.5rem; }
+    .section { padding: 3rem 1.5rem; }
+    
+    .formula-box {
+      background: transparent;
+      border: none;
+      padding: 1rem 0;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    
+    
+    .conclusion-box {
+      background: #fff;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 2rem;
+    }
+    .conclusion-box p {
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .conclusion-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* ==================== MOBILE RESPONSIVE STYLES ==================== */
+    
+    /* Tablets and smaller */
+    @media (max-width: 1024px) {
+      .hero .title.is-1 { font-size: 2.2rem; }
+    }
+    
+    /* Mobile devices */
+    @media (max-width: 768px) {
+      /* Hero Section */
+      .hero .hero-body { padding-top: 1.2rem; padding-bottom: 0.6rem; }
+      .hero .title.is-1 { 
+        font-size: 1.5rem; 
+        white-space: normal !important; 
+        line-height: 1.3;
+      }
+      
+      /* Authors - make them wrap nicely */
+      .publication-authors { font-size: 0.9rem !important; }
+      .publication-authors .author-block { 
+        display: inline; 
+        white-space: nowrap;
+      }
+      .is-size-6.publication-authors { font-size: 0.8rem !important; }
+      .is-size-6.publication-authors .author-block { margin-left: 0.3em !important; }
+      
+      /* Section padding */
+      .section { padding: 2rem 1rem; }
+      
+      /* Titles */
+      h2.title.is-3, .title.is-3.section-title { font-size: 1.4rem; }
+      h4.subsection-title { font-size: 1.1rem; }
+      
+      /* Math comparison boxes */
+      .math-comparison { gap: 1rem; }
+      .math-box { padding: 1rem; }
+      .math-box p { font-size: 0.95rem; }
+      
+      /* Formula boxes - handle overflow */
+      .formula-box { 
+        overflow-x: auto; 
+        padding: 0.5rem;
+      }
+      .formula-box p { font-size: 0.9rem; }
+      
+      /* Insight boxes */
+      .insight-box { padding: 1rem 1.25rem; }
+      .insight-box p { font-size: 1rem; }
+      
+      /* Result cards */
+      .result-card { padding: 1.25rem; }
+      .result-card h4 { font-size: 1.1rem; }
+      
+      /* Figure captions */
+      .figure-caption { font-size: 0.8rem; }
+      
+      /* Tables - make scrollable */
+      .comparison-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table.comparison-table { 
+        min-width: 500px; 
+        font-size: 0.85rem;
+      }
+      table.comparison-table th, 
+      table.comparison-table td { 
+        padding: 0.5rem 0.75rem; 
+      }
+      
+      /* Conclusion box */
+      .conclusion-box { padding: 1.25rem; }
+      
+      /* BibTeX */
+      .bibtex-box { padding: 1rem; }
+      .bibtex-box code { font-size: 0.7rem; }
+      
+      /* Publication links buttons */
+      .publication-links .button { 
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+      }
+      
+      /* Footer */
+      footer.footer { padding: 1.5rem 1rem; }
+      footer.footer img { height: 60px !important; }
+      footer p { font-size: 0.85rem; }
+      
+      /* TL;DR text */
+      .hero .hero-body p[style*="Castoro"] { font-size: 0.95rem !important; }
+    }
+    
+    /* Small phones */
+    @media (max-width: 480px) {
+      .hero .title.is-1 { font-size: 1.25rem; }
+      .publication-authors { font-size: 0.8rem !important; }
+      
+      h2.title.is-3, .title.is-3.section-title { font-size: 1.25rem; }
+      
+      .content p, .content li { font-size: 0.9rem; }
+      
+      .math-box h4 { font-size: 0.95rem; }
+      .math-box p { font-size: 0.85rem; }
+      
+      .result-card { padding: 1rem; }
+      .result-card h4 { font-size: 1rem; }
+      
+      /* Extra small formulas */
+      .formula-box p { font-size: 0.85rem; }
+      
+      /* Theorem boxes */
+      .result-card[style*="border-left"] { padding: 1rem; }
+      .result-card[style*="border-left"] h4 { font-size: 1rem; }
+      .result-card[style*="border-left"] div[style*="text-align: center"] { font-size: 0.9rem !important; }
+    }
+    
+    /* Ensure images never overflow */
+    img { max-width: 100%; height: auto; }
+    
+    /* KaTeX formula overflow handling */
+    .katex-display { overflow-x: auto; overflow-y: hidden; }
+    
+    /* Global overflow prevention */
+    .container { overflow-x: hidden; }
+    .content { word-wrap: break-word; overflow-wrap: break-word; }
+    
+    /* Table wrapper for mobile scrolling */
+    .comparison-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Algorithm box mobile */
+    @media (max-width: 768px) {
+      .algorithm-box { 
+        font-size: 0.75rem; 
+        padding: 1rem;
+      }
+    }
+    
+    /* Result card theorem boxes mobile adjustments */
+    @media (max-width: 768px) {
+      .result-card div[style*="text-align: center"] {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-widescreen">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Reinforcement Learning with Textual Feedback <br> via Natural Language Actor‑Critic</h1>
+
+          <!-- Authors Section -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Utsav Singh<sup>*,1</sup>,</span>
+            <span class="author-block">Sidhaarth Sredharan<sup>*,2</sup>,</span>
+            <span class="author-block">Souradip Chakraborty<sup>3</sup>,</span>
+            <span class="author-block">Amrit Singh Bedi<sup>4</sup></span>
+          </div>
+          <div class="is-size-6 publication-authors" style="margin-top: 0.4rem;">
+            <span class="author-block"><sup>1</sup>IIT Kanpur</span>
+            <span class="author-block" style="margin-left: 0.8em;"><sup>2</sup>Carnegie Mellon University</span>
+            <span class="author-block" style="margin-left: 0.8em;"><sup>3</sup>University of Maryland</span>
+            <span class="author-block" style="margin-left: 0.8em;"><sup>4</sup>University of Central Florida</span>
+            <span class="author-block" style="margin-left: 0.8em;"><sup>*</sup>Equal contribution</span>
+          </div>
+
+          <div class="has-text-centered" style="margin-top: 0.8rem;">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded" target="_blank">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- <span class="link-block">
+                <a href="./MLMT_RL_Arxiv_Version-4.pdf" class="external-link button is-normal is-rounded" target="_blank">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>PDF</span>
+                </a>
+              </span> -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded" target="_blank">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+
+              <div style="margin-top: 0.6rem; text-align: center;">
+              <p style="font-family: 'Castoro', Georgia, serif; font-size: 1.05rem; color: #374151;">
+                <strong>TL;DR</strong>&nbsp; A framework to improve LLM reasoning by effectively aligning the actor and critic models via <strong>bilevel formulation</strong>.
+              </p>
+            </div>
+
+            <!-- Main Results Figure -->
+            <div class="figure-container" style="margin-top: 0.5rem;">
+              <center>
+                <img src="./static/images/main_results_image.jpg" alt="Main Results" style="max-width: 85%;">
+              </center>
+              <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Bi-NAC vs GRPO comparison:</strong> (Left) GRPO struggles initially as most trajectories yield zero rewards, whereas our bilevel actor-critic formulation enables faster learning. (Right) Our approach consistently outperforms GRPO across benchmarks with superior parameter efficiency.
+              </p>
+            </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ABSTRACT ==================== -->
+<section class="section section-white" style="padding-top: 0.8rem; padding-bottom: 0.5rem;">
+  <div class="container is-max-desktop">
+
+    <!-- Teaser Diagram -->
+    <div class="figure-container" style="margin: 0;">
+      <center>
+        <!-- TODO: replace with your exported teaser image path -->
+        <img src="./static/images/bilevel_grpo_main_figure1.gif" alt="Bi-NAC Teaser" style="max-width: 80%; border-radius: 6px;">
+      </center>
+    </div>
+
+    <!-- <div class="content" style="margin-top: 1.0rem;">
+      <h2 class="title is-3 section-title">Abstract</h2>
+      <p>
+        Reinforcement learning with verifiable rewards can improve LLM reasoning, but learning is sample-inefficient under sparse terminal rewards. Prior work mitigates this by adding natural language critiques, yet it typically treats critique generation as fixed or auxiliary, so correct-sounding feedback may not translate into higher verified reward.
+We argue that natural language actor-critic for reasoning is inherently bilevel: the usefulness of the critique is defined by its downstream effect on the actor after adaptation. We formalize this coupling as a Stackelberg bilevel program and derive {Bilevel Natural Language Actor-Critic (Bi-NAC)}, which jointly trains a critic to generate reward-improving feedback and an actor to exploit it. Across reasoning benchmarks, Bi-NAC improves sample and parameter efficiency over RL baselines and fixed-critic feedback methods. We perform experiments on MATH-500, MBPP, and GPQA demonstrating that Bi-NAC significantly enhances parameter and sample efficiency, enabling smaller models to outperform larger baselines. Specifically, our 2B model consistently outperforms the larger 3B GRPO baseline across all tasks (46.6% vs. 41.4% on MATH-500), while our 6B model surpasses the 7B GRPO baseline (49.3% vs. 43.6% on GPQA). These results show that aligning actor and critic via bilevel formulation provides a robust and efficient alternative for solving complex reasoning tasks.
+      </p>
+    </div> -->
+
+  </div>
+</section>
+
+<!-- ==================== THE PROBLEM ==================== -->
+<section class="section" style="padding-top: 2rem; padding-bottom: 1.5rem;">
+  <div class="container is-max-desktop">
+    <div class="content">
+
+      <div style="margin-top: 1.2rem;">
+              <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); padding: 1.8rem 2rem; border-radius: 12px; border-left: 6px solid #dc2626; max-width: 780px; margin: 0 auto;">
+                <p style="font-family: 'Google Sans', sans-serif; font-size: 1.005rem; line-height: 1.7; margin: 0; color: #000000; text-align: left;">
+                  <strong style="color: #991b1b;">💡</strong> <strong style="color: #991b1b">Reinforcement learning with verifiable rewards</strong> can improve LLM reasoning, but learning is sample-inefficient under sparse terminal rewards.
+                </p>
+              </div>
+            </div>
+
+
+            <div style="margin-top: 1.2rem;">
+              <div style="background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); padding: 1.8rem 2rem; border-radius: 12px; border-left: 6px solid #eab308; max-width: 780px; margin: 0 auto;">
+                <p style="font-family: 'Google Sans', sans-serif; font-size: 1.005rem; line-height: 1.7; margin: 0; color: #000000; text-align: left;">
+                  <strong style="color: #854d0e;">💡</strong> Prior work mitigates this by adding <strong style="color: #854d0e">natural language critiques</strong>, yet it typically treats critique generation as fixed or auxiliary, causing actor-critic misalignment and leading to sub-optimal performance.
+                </p>
+              </div>
+            </div>
+
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== BI-NAC FRAMEWORK ==================== -->
+<section class="section section-white" style="padding-top: 2rem; padding-bottom: 2rem;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title" style="text-align: center; color: #16a34a; margin-bottom: 1.5rem;">Bi-NAC: Bilevel Natural Language Actor-Critic</h2>
+
+    <div class="content">
+      <p style="font-size: 1.1rem; text-align: center; color: #4b5563; margin-bottom: 2rem;">
+        We formalize reasoning with textual feedback as a <strong style="color: #16a34a;">Stackelberg bilevel formulation</strong> and derive <strong style="color: #16a34a;">Bi-NAC</strong>, where the critic is optimized to generate feedback that maximizes the actor’s downstream performance, and the actor is optimized to generate refined outputs based on the feedback</strong>.
+      </p>
+
+      <div class="box" style="background: #ffffff; border: 2px solid #e5e7eb; border-left: 6px solid #16a34a; border-radius: 12px; padding: 2rem;">
+
+        <h3 class="title is-5" style="color: #16a34a; margin-bottom: 1rem;">🎯 Two-Step Interaction</h3>
+        <ol style="font-size: 1.05rem; line-height: 1.8; color: #374151;">
+          <li><strong>Actor</strong> $\left(\pi^L_\theta(\cdot \mid x) \right)$ produces initial attempt $y_0$ given prompt $x$</li>
+          <li><strong>Critic</strong> $\left( \pi^H_\phi(\cdot \mid x, y_0) \right)$ generates textual feedback $f$ based on $(x, y_0)$</li>
+          <li><strong>Actor</strong> $\left( \pi^L_{\theta}(\cdot \mid x, y_0, z) \right)$ produces refined response $y_1$ conditioned on $(x, y_0, f)$</li>
+          <li><strong>Verifier</strong> $\left( R(x,y_1) \right)$ scores $y_1$ with binary reward $r \in \{0,1\}$</li>
+        </ol>
+
+        <h3 class="title is-5" style="color: #16a34a; margin-top: 1.5rem; margin-bottom: 1rem;">🎯 Bilevel Optimization</h3>
+        <p style="font-size: 1.05rem; line-height: 1.8; color: #374151;">
+          The actor and critic optimize the following bilevel objective
+        </p>
+        <div style="text-align: center; margin: 1rem 0;">
+          $\max_{\phi, \theta} \mathcal{L}(\phi, \theta, \lambda) \!=\! \max_{\phi, \theta} U\!\bigl(\phi, \theta\bigr) \!+\! \lambda \big(L(\phi, \theta) \!-\! L(\phi, \theta^*(\phi)) \big), \quad$ where
+        </div>
+
+        <div style="text-align: center; margin: 1rem 0;">
+          $U(\phi, \theta) = \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x,y_1) \right], \quad$ and
+        </div>
+
+        <div style="text-align: center; margin: 1rem 0;">
+          $L(\phi, \theta) = \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x, y_1) \right]$.
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== KEY INSIGHTS ==================== -->
+<section class="section" style="padding-top: 2rem; padding-bottom: 2rem; background: #f9fafb;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title" style="text-align: center; margin-bottom: 2rem;">Key Insights</h2>
+
+    <!-- Top Row -->
+    <div class="columns">
+      <!-- Top Left: Misalignment Problem -->
+      <div class="column">
+        <div class="box" style="height: 100%; border-left: 4px solid #dc2626; background: white;">
+          <h3 class="title is-5" style="color: #dc2626;">❌ The Misalignment Problem</h3>
+          <p style="line-height: 1.7;">
+            Fixed or auxiliary critics can generate <strong>ineffective guidance</strong> due to misalignment between actor and critic, leading to sub-optimal performance.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Top Right: Advantage Collapse -->
+      <div class="column">
+        <div class="box" style="height: 100%; border-left: 4px solid #f59e0b; background: white;">
+          <h3 class="title is-5" style="color: #f59e0b;">🎲 Advantage Collapse</h3>
+          <p style="line-height: 1.7;">
+            Prior approaches like GRPO suffer under sparse terminal rewards. On MBPP, <strong>74% of training groups in GRPO lead to 0 rewards</strong>, causing advantage collapse.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="columns" style="margin-top: 1rem;">
+      <!-- Bottom Left: Dense Feedback Signal -->
+      <div class="column">
+        <div class="box" style="height: 100%; border-left: 4px solid #8b5cf6; background: white;">
+          <h3 class="title is-5" style="color: #8b5cf6;">💡 Dense Feedback Signal</h3>
+          <p style="line-height: 1.7;">
+            Textual feedback provides <strong>denser supervision</strong> beyond binary terminal rewards; however, it may lead to sub-optimal performance due to actor-critic misalignment.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bottom Right: Bi-NAC's Solution -->
+      <div class="column">
+        <div class="box" style="height: 100%; border-left: 4px solid #16a34a; background: white;">
+          <h3 class="title is-5" style="color: #16a34a;">✅ Bi-NAC's Solution</h3>
+          <p style="line-height: 1.7;">
+            Bi-NAC leverages bilevel formulation to enable effective actor-critic alignment, significantly improving LLM reasoning performance.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+  </div>
+</section>
+
+<!-- ==================== RESULTS ==================== -->
+<section class="section section-white" style="padding-top: 2rem; padding-bottom: 2rem;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title" style="text-align: center; margin-bottom: 2rem;">Results</h2>
+
+    <div class="content">
+
+      <h3 class="title is-5" style="margin-top: 1.5rem; margin-bottom: 1rem;">1. Parameter Efficiency: Bi-NAC vs GRPO</h3>
+      <div class="table-container">
+        <table class="table is-striped is-fullwidth" style="background: white;">
+          <thead style="background: #f3f4f6;">
+            <tr>
+              <th>Method</th>
+              <th>Size</th>
+              <th>MATH-500</th>
+              <th>MBPP</th>
+              <th>GPQA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GRPO</td>
+              <td>3B</td>
+              <td>41.4</td>
+              <td>61.6</td>
+              <td>36.4</td>
+            </tr>
+            <tr style="background: #dcfce7;">
+              <td><strong>Bi-NAC</strong></td>
+              <td><strong>2B</strong></td>
+              <td><strong>46.6</strong> <span style="color: #16a34a;">(+5.2)</span></td>
+              <td><strong>66.7</strong> <span style="color: #16a34a;">(+5.1)</span></td>
+              <td><strong>41.2</strong> <span style="color: #16a34a;">(+4.8)</span></td>
+            </tr>
+            <tr>
+              <td colspan="5" style="height: 0.5rem; background: white;"></td>
+            </tr>
+            <tr>
+              <td>GRPO</td>
+              <td>7B</td>
+              <td>48.4</td>
+              <td>72.2</td>
+              <td>43.6</td>
+            </tr>
+            <tr style="background: #dcfce7;">
+              <td><strong>Bi-NAC</strong></td>
+              <td><strong>6B</strong></td>
+              <td><strong>51.4</strong> <span style="color: #16a34a;">(+3.0)</span></td>
+              <td><strong>75.0</strong> <span style="color: #16a34a;">(+2.8)</span></td>
+              <td><strong>49.3</strong> <span style="color: #16a34a;">(+5.7)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Takeaway Box 1 -->
+      <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; border-left: 5px solid #3b82f6;">
+        <p style="font-size: 1.15rem; margin: 0; color: #1e40af;">
+          <strong>Takeaway 1:</strong> Bi-NAC exhibits <strong>faster convergence</strong> and better <strong>parameter and sample efficiency</strong> than GRPO baselines.
+        </p>
+      </div>
+
+    <h3 class="title is-5" style="margin-top: 1.5rem; margin-bottom: 1rem;">2. Comparison between fixed/auxiliary and aligned feedback (Bi-NAC)</h3>
+    <div class="figure-container" style="margin: 0;">
+      <center>
+        <!-- TODO: replace with your exported teaser image path -->
+        <img src="./static/images/feedback_progression.jpg" alt="Bi-NAC Teaser" style="max-width: 60%; border-radius: 6px;">
+        <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Feedback comparison:</strong> (Left) While fixed/auxiliary feedback marginally improves accuracy over baselines (Untrained and RL Trained Actors), our bilevel approach (Bi-NAC) yields significantly larger gains by enabling actor-critic alignment.
+        </p>
+      </center>
+    </div>
+
+      <!-- Takeaway Box 3 -->
+      <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; border-left: 5px solid #3b82f6;">
+        <p style="font-size: 1.15rem; margin: 0; color: #1e40af;">
+          <strong>Takeaway 2:</strong> Adding fixed feedback to GRPO gives only <strong>marginal gains (~3%)</strong>. Bi-NAC's bilevel training yields <strong>10+ point improvements</strong> (MATH-500: 36.6 → 46.6).
+        </p>
+      </div>
+
+      <!-- Comparison with SOTA -->
+      <h3 class="title is-5" style="margin-top: 2rem; margin-bottom: 1rem;">3. Comparison with State-of-the-Art Methods (1B/3B/8B scales)</h3>
+      <div class="table-container">
+        <table class="table is-striped is-fullwidth" style="background: white; font-size: 0.95rem;">
+          <thead style="background: #f3f4f6;">
+            <tr>
+              <th rowspan="2">Method</th>
+              <th colspan="3" style="text-align: center; border-right: 2px solid #e5e7eb;">1B</th>
+              <th colspan="3" style="text-align: center; border-right: 2px solid #e5e7eb;">3B</th>
+              <th colspan="3" style="text-align: center;">8B</th>
+            </tr>
+            <tr>
+              <th style="font-size: 0.85rem;">MATH</th>
+              <th style="font-size: 0.85rem;">MBPP</th>
+              <th style="font-size: 0.85rem; border-right: 2px solid #e5e7eb;">GPQA</th>
+              <th style="font-size: 0.85rem;">MATH</th>
+              <th style="font-size: 0.85rem;">MBPP</th>
+              <th style="font-size: 0.85rem; border-right: 2px solid #e5e7eb;">GPQA</th>
+              <th style="font-size: 0.85rem;">MATH</th>
+              <th style="font-size: 0.85rem;">MBPP</th>
+              <th style="font-size: 0.85rem;">GPQA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BC</td>
+              <td>26.2</td>
+              <td>50.0</td>
+              <td style="border-right: 2px solid #e5e7eb;">30.2</td>
+              <td>42.4</td>
+              <td>68.5</td>
+              <td style="border-right: 2px solid #e5e7eb;">37.1</td>
+              <td>53.0</td>
+              <td>74.5</td>
+              <td>39.0</td>
+            </tr>
+            <tr>
+              <td>Hier-NFT</td>
+              <td>25.8</td>
+              <td>41.3</td>
+              <td style="border-right: 2px solid #e5e7eb;">26.8</td>
+              <td>41.3</td>
+              <td>61.0</td>
+              <td style="border-right: 2px solid #e5e7eb;">32.7</td>
+              <td>50.9</td>
+              <td>72.8</td>
+              <td>34.2</td>
+            </tr>
+            <tr>
+              <td>ArCHer</td>
+              <td>30.6</td>
+              <td>52.4</td>
+              <td style="border-right: 2px solid #e5e7eb;">33.6</td>
+              <td>43.6</td>
+              <td>69.5</td>
+              <td style="border-right: 2px solid #e5e7eb;">40.9</td>
+              <td>55.5</td>
+              <td>76.0</td>
+              <td>43.0</td>
+            </tr>
+            <tr>
+              <td>SCoRe</td>
+              <td>39.8</td>
+              <td>62.3</td>
+              <td style="border-right: 2px solid #e5e7eb;">34.4</td>
+              <td>45.2</td>
+              <td>70.7</td>
+              <td style="border-right: 2px solid #e5e7eb;">42.6</td>
+              <td>56.8</td>
+              <td>77.3</td>
+              <td>44.6</td>
+            </tr>
+            <tr style="background: #dcfce7; font-weight: 600;">
+              <td><strong>Bi-NAC</strong></td>
+              <td>46.6</td>
+              <td>66.4</td>
+              <td style="border-right: 2px solid #e5e7eb;">40.6</td>
+              <td>51.4</td>
+              <td>75.0</td>
+              <td style="border-right: 2px solid #e5e7eb;">49.3</td>
+              <td>60.2</td>
+              <td>79.8</td>
+              <td>56.3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Takeaway Box 4 -->
+      <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0; border-left: 5px solid #3b82f6;">
+        <p style="font-size: 1.15rem; margin: 0; color: #1e40af;">
+          <strong>Takeaway 3:</strong> Bi-NAC's gains persist across model scales and consistently outperforms all baselines, with especially large improvements on challenging benchmarks like <strong>GPQA (+11.7 at 8B scale)</strong>.
+        </p>
+      </div>
+
+      <h3 class="title is-5" style="margin-top: 2rem; margin-bottom: 1rem;">4. Feedback Optimality & Compatibility Analysis (MATH-500)</h3>
+      <div class="content">
+      <p style="text-align: left; font-size: 1.1rem; color: #4b5563; margin-bottom: 2rem;">
+        Does Bi-NAC generate better feedback, and does the actor effectively use it?
+      </p>
+
+      <div class="table-container">
+        <table class="table is-striped is-fullwidth" style="background: white;">
+          <thead style="background: #f3f4f6;">
+            <tr>
+              <th>Method</th>
+              <th>Trained Critic</th>
+              <th>Trained Actor</th>
+              <th>Accuracy ↑</th>
+              <th>FO ↑</th>
+              <th>Δ<sub>acc</sub> (t<sub>1</sub>,t<sub>2</sub>) ↑</th>
+              <th>Δ<sub>i→c</sub> (t<sub>1</sub>,t<sub>2</sub>) ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hier-NFT</td>
+              <td><strong style="color: #dc2626;">❌</strong></td>
+              <td><strong style="color: #dc2626;">❌</strong></td>
+              <td>35.4</td>
+              <td>2.1</td>
+              <td>9.6</td>
+              <td>12.2</td>
+            </tr>
+            <tr>
+              <td>SCoRe</td>
+              <td><strong style="color: #dc2626;">❌</strong></td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td>39.6</td>
+              <td>2.1</td>
+              <td>7.4</td>
+              <td>17.8</td>
+            </tr>
+            <tr>
+              <td>Hier-FT</td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td><strong style="color: #dc2626;">❌</strong></td>
+              <td>38.0</td>
+              <td>3.0</td>
+              <td>8.8</td>
+              <td>16.0</td>
+            </tr>
+            <tr>
+              <td>Bi-NAC w/o BL</td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td>41.8</td>
+              <td>3.6</td>
+              <td>9.6</td>
+              <td>19.2</td>
+            </tr>
+            <tr style="background: #dcfce7; font-weight: 600;">
+              <td><strong>Bi-NAC</strong></td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td><strong style="color: #16a34a;">✅</strong></td>
+              <td><strong>46.6</strong></td>
+              <td><strong>4.2</strong></td>
+              <td><strong>11.4</strong></td>
+              <td><strong>21.2</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="has-text-grey" style="font-size: 0.9rem; margin-top: 0.8rem;">
+        <strong>FO:</strong> Feedback Optimality (1-5 scale, LLM judge) | 
+        <th>Δ<sub>acc</sub> (t<sub>1</sub>,t<sub>2</sub>) ↑</th> Accuracy increase from turn 1 to turn 2 | 
+        <th>Δ<sub>i→c</sub> (t<sub>1</sub>,t<sub>2</sub>) ↑</th> Fraction flipped from incorrect to correct
+      </p>
+
+      <!-- Takeaway Box 5 -->
+      <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border-left: 5px solid #6366f1;">
+        <p style="font-size: 1.15rem; margin: 0; color: #3730a3;">
+          <strong>Takeaway 4:</strong> Bi-NAC achieves the <strong>highest feedback optimality (FO=4.2)</strong> and the actor is able to effectively leverages the feedback, demonstrating successful alignment between critic and actor.
+        </p>
+      </div>
+
+      <h3 class="title is-5" style="margin-top: 2rem; margin-bottom: 1rem;">5. Single-Model Bi-NAC</h3>
+      <div class="content">
+      <p style="text-align: left; font-size: 1.1rem; color: #4b5563; margin-bottom: 1.5rem;">
+        Can a single model do both critique generation <em>and</em> response refinement? <br> We tested a LLAMA-3.2-1B model variant where a <strong>single LLM</strong> generates both the responses and feedback. 
+      </p>
+
+        <div class="table-container" style="margin-top: 1rem;">
+          <table class="table is-striped is-fullwidth" style="background: white;">
+          <thead style="background: #f3f4f6;">
+              <tr>
+                <th>Variant</th>
+                <th>MATH-500</th>
+                <th>MBPP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bi-NAC (2 models)</td>
+                <td>46.56</td>
+                <td>66.73</td>
+              </tr>
+              <tr style="background: #dcfce7; font-weight: 600;">
+                <td><strong>Bi-NAC (1 model)</strong></td>
+                <td><strong>46.84</strong></td>
+                <td><strong>65.24</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Takeaway Box 5 -->
+      <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 1.5rem; border-radius: 10px; margin-top: 1.5rem; border-left: 5px solid #6366f1;">
+        <p style="font-size: 1.15rem; margin: 0; color: #3730a3;">
+          <strong>Takeaway 5:</strong> The performance of the single-model variant is <strong>comparable to the two-model variant</strong>, which demonstrates Bi-NAC's practicality.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== BIBTEX ==================== -->
+<section class="section" style="padding-top: 2rem; padding-bottom: 2rem; background: #f9fafb;">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title" style="text-align: center; margin-bottom: 1.5rem;">BibTeX</h2>
+    <div class="content">
+      <pre style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem;"><code>Coming Soon</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <p style="text-align: center;">
+        Corresponding author: <a href="mailto:utsavz@iitk.ac.in">Utsav Singh</a><br>
+        Template adapted from <a href="https://github.com/nerfies/nerfies.github.io" target="_blank">Nerfies</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
