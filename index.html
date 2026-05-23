@@ -439,9 +439,9 @@
             <span class="author-block">Amrit Singh Bedi<sup>1</sup></span>
           </div>
           <div class="is-size-6 publication-authors" style="margin-top: 0.4rem;">
+            <span class="author-block" style="margin-left: 0.8em;"><sup>1</sup>University of Central Florida</span>
             <span class="author-block" style="margin-left: 0.8em;"><sup>2</sup>Carnegie Mellon University</span>
             <span class="author-block" style="margin-left: 0.8em;"><sup>3</sup>University of Maryland</span>
-            <span class="author-block" style="margin-left: 0.8em;"><sup>1</sup>University of Central Florida</span>
             <span class="author-block" style="margin-left: 0.8em;"><sup>*</sup>Equal contribution</span>
           </div>
 
@@ -475,9 +475,9 @@
             <!-- Main Results Figure -->
             <div class="figure-container" style="margin-top: 0.5rem;">
               <center>
-                <img src="./static/images/main_results_image.jpg" alt="Main Results" style="max-width: 80%;">
+                <img src="./static/images/main_figure_website_page-0001.jpg" alt="Main Results" style="max-width: 80%;">
               </center>
-              <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Bi-NAC vs GRPO comparison:</strong> (Left) GRPO struggles initially as most trajectories yield zero rewards, whereas our bilevel actor-critic formulation enables faster learning. (Right) Our approach consistently outperforms GRPO across benchmarks with superior parameter efficiency.
+              <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Trained, aligned feedback yields faster convergence and higher reasoning accuracy.:</strong> (Left) Vanilla GRPO on MBPP with LLaMA-3.2-1B exhibits a zero-reward phase} (around 600 steps) where advantage collapse stalls learning.  Fixed feedback (critiques from a frozen LLM not optimized for task reward) yields only marginal gains, replacing it with learnable feedback, where the critic is optimized for the actor's downstream reward, yields a larger improvement. (Right) On MATH-500, an untrained actor reaches 26.2%, and vanilla RL reaches 36.6%; fixed feedback adds little (39.6%), but our Bi-NAC, which jointly trains actor and critic via a bilevel objective, reaches 46.6% (+7\% over fixed feedback). Takeaway: feedback \emph{quality} drives sample efficiency; aligning critic and actor through bilevel optimization leads to superior gains over static feedback-based methods.
               </p>
             </div>
 
@@ -706,8 +706,8 @@ We argue that natural language actor-critic for reasoning is inherently bilevel:
     <div class="figure-container" style="margin: 0;">
       <center>
         <!-- TODO: replace with your exported teaser image path -->
-        <img src="./static/images/feedback_progression.jpg" alt="Bi-NAC Teaser" style="max-width: 60%; border-radius: 6px;">
-        <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Feedback comparison:</strong> (Left) While fixed/auxiliary feedback marginally improves accuracy over baselines (Untrained and RL Trained Actors), our bilevel approach (Bi-NAC) yields significantly larger gains by enabling actor-critic alignment.
+        <img src="./static/images/Bi_Nac_Feedback_Baselines_Wider_page-0001.jpg" alt="Bi-NAC Teaser" style="max-width: 60%; border-radius: 6px;">
+        <p class="figure-caption" style="max-width: 1000px; margin: 0 auto;"> <strong>Feedback comparison:</strong> (Left) Bi-NAC significantly outperforms methods that rely on fixed or auxiliary critics on MATH-500, demonstrating the efficacy of our bilevel framework.
         </p>
       </center>
     </div>
@@ -946,7 +946,17 @@ We argue that natural language actor-critic for reasoning is inherently bilevel:
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title" style="text-align: center; margin-bottom: 1.5rem;">BibTeX</h2>
     <div class="content">
-      <pre style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem;"><code>Coming Soon</code></pre>
+      <pre style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem;"><code>
+      @inproceedings{singh2026rl,
+      title     = {RL with Learnable Textual Feedback: A Bilevel Approach},
+      author    = {Singh, Utsav and Sredharan, Sidhaarth and Chakraborty, Souradip and Bedi, Amrit Singh},
+      booktitle = {Proceedings of the 43rd International Conference on Machine Learning},
+      series    = {PMLR},
+      volume    = {306},
+      year      = {2026},
+    }
+        
+      </code></pre>
     </div>
   </div>
 </section>
@@ -956,7 +966,7 @@ We argue that natural language actor-critic for reasoning is inherently bilevel:
   <div class="container">
     <div class="columns is-centered">
       <p style="text-align: center;">
-        Corresponding author: <a href="mailto:utsavz@iitk.ac.in">Utsav Singh</a><br>
+        Corresponding author: <a href="mailto:amritbedi@ucf.edu">Amrit Singh Bedi</a><br>
         Template adapted from <a href="https://github.com/nerfies/nerfies.github.io" target="_blank">Nerfies</a>.
       </p>
     </div>
