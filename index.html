@@ -566,11 +566,11 @@
         </div>
 
         <div style="text-align: center; margin: 1rem 0;">
-          Upper Level Objective: $ \max_{\theta} U(\phi, \theta) = \max_{\theta} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x,y_1) \right], \quad$ and
+          <strong>Upper Level Objective</strong>: $ \max_{\theta} U(\phi, \theta) = \max_{\theta} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x,y_1) \right], \quad$ and
         </div>
 
         <div style="text-align: center; margin: 1rem 0;">
-          Lower Level Objective:  \max_{\phi} $L(\phi, \theta) = \max_{\phi} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x, y_1) \right]$.
+          <strong>Lower Level Objective</strong>strong>:  $ \max_{\phi} L(\phi, \theta) = \max_{\phi} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x, y_1) \right]$.
         </div>
 
       </div>
@@ -588,7 +588,7 @@
       <center>
         <h2 class="title is-0 section-title">Bi-NAC Architecture</h2>
         <p>
-          Top Left: In prior approaches where actor and critic are not aligned (e.g., auxiliary critics or fixed feedback critics), this misalignment often leads to ineffective guidance, where the feedback is either incorrect or ignored by the actor, thus resulting in incorrect final outputs. Bottom Left: We show this in an illustrative example where the feedback and final output are incorrect. Top Right: Bi-NAC explicitly models the dependency between feedback generation and policy improvement by training the critic to maximize the final task performance of the actor, thus also enabling the actor to effectively leverage it. Bottom Right: The illustrative example shows how correct aligned feedback successfully guides the actor from a flawed initial response to the correct final solution.
+          <strong>Top Left</strong>strong>: In prior approaches where actor and critic are not aligned (e.g., auxiliary critics or fixed feedback critics), this misalignment often leads to ineffective guidance, where the feedback is either incorrect or ignored by the actor, thus resulting in incorrect final outputs. <strong>Bottom Left</strong>strong>: We show this in an illustrative example where the feedback and final output are incorrect. <strong>Top Right</strong>strong>: Bi-NAC explicitly models the dependency between feedback generation and policy improvement by training the critic to maximize the final task performance of the actor, thus also enabling the actor to effectively leverage it. <strong>Bottom Right</strong>strong>: The illustrative example shows how correct aligned feedback successfully guides the actor from a flawed initial response to the correct final solution.
           </p>
         <!-- TODO: replace with your exported teaser image path -->
         <img src="./static/images/bilevel_grpo_main_figure1.gif" alt="Bi-NAC Teaser" style="max-width: 80%; border-radius: 6px;">
