@@ -497,18 +497,21 @@
     <!-- Teaser Diagram -->
     <div class="figure-container" style="margin: 0;">
       <center>
+        <h2 class="title is-0 section-title">Method Overview</h2>
+        <p>
+          Top Left: In prior approaches where actor and critic are not aligned (e.g., auxiliary critics or fixed feedback critics), this misalignment often leads to ineffective guidance, where the feedback is either incorrect or ignored by the actor, thus resulting in incorrect final outputs. Bottom Left: We show this in an illustrative example where the feedback and final output are incorrect. Top Right: Bi-NAC explicitly models the dependency between feedback generation and policy improvement by training the critic to maximize the final task performance of the actor, thus also enabling the actor to effectively leverage it. Bottom Right: The illustrative example shows how correct aligned feedback successfully guides the actor from a flawed initial response to the correct final solution.
+          </p>
         <!-- TODO: replace with your exported teaser image path -->
         <img src="./static/images/bilevel_grpo_main_figure1.gif" alt="Bi-NAC Teaser" style="max-width: 80%; border-radius: 6px;">
       </center>
     </div>
 
-    <!-- <div class="content" style="margin-top: 1.0rem;">
+    <div class="content" style="margin-top: 1.0rem;">
       <h2 class="title is-3 section-title">Abstract</h2>
       <p>
-        Reinforcement learning with verifiable rewards can improve LLM reasoning, but learning is sample-inefficient under sparse terminal rewards. Prior work mitigates this by adding natural language critiques, yet it typically treats critique generation as fixed or auxiliary, so correct-sounding feedback may not translate into higher verified reward.
-We argue that natural language actor-critic for reasoning is inherently bilevel: the usefulness of the critique is defined by its downstream effect on the actor after adaptation. We formalize this coupling as a Stackelberg bilevel program and derive {Bilevel Natural Language Actor-Critic (Bi-NAC)}, which jointly trains a critic to generate reward-improving feedback and an actor to exploit it. Across reasoning benchmarks, Bi-NAC improves sample and parameter efficiency over RL baselines and fixed-critic feedback methods. We perform experiments on MATH-500, MBPP, and GPQA demonstrating that Bi-NAC significantly enhances parameter and sample efficiency, enabling smaller models to outperform larger baselines. Specifically, our 2B model consistently outperforms the larger 3B GRPO baseline across all tasks (46.6% vs. 41.4% on MATH-500), while our 6B model surpasses the 7B GRPO baseline (49.3% vs. 43.6% on GPQA). These results show that aligning actor and critic via bilevel formulation provides a robust and efficient alternative for solving complex reasoning tasks.
+        Reinforcement learning with verifiable rewards can improve LLM reasoning, but learning remains sample-inefficient when terminal rewards are sparse. This has motivated a growing line of work on RL with textual feedback, where a critic model generates natural language feedback to guide a reasoning model (the actor), augmenting scalar rewards with richer learning signals. However, existing methods typically treat feedback as fixed or auxiliary, which misses a key property: feedback should not merely be correct, but should improve the policy (actor model) when provided in context. This motivates a paradigm of learnable textual feedback for RL. Yet the learnability and usefulness of feedback depend on the policy's ability to learn from it, making RL with learnable feedback an inherently bilevel problem. We formalize this coupling as a Stackelberg bilevel program and derive Bilevel Natural Language Actor-Critic (Bi-NAC), which jointly trains a critic to generate reward-improving feedback and an actor to exploit it. Across MATH-500, MBPP, and GPQA, Bi-NAC improves sample and parameter efficiency over RL and fixed-critic baselines: our 2B model outperforms the 3B GRPO baseline, achieving 46.6% versus 41.4% on MATH-500, while our 6B model surpasses the 7B GRPO baseline, achieving 49.3% versus 43.6% on GPQA.
       </p>
-    </div> -->
+    </div>
 
   </div>
 </section>
