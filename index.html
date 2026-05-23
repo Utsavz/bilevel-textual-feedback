@@ -566,11 +566,11 @@
         </div>
 
         <div style="text-align: center; margin: 1rem 0;">
-          $U(\phi, \theta) = \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x,y_1) \right], \quad$ and
+          Upper Level Objective: $ \max_{\theta} U(\phi, \theta) = \max_{\theta} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x,y_1) \right], \quad$ and
         </div>
 
         <div style="text-align: center; margin: 1rem 0;">
-          $L(\phi, \theta) = \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x, y_1) \right]$.
+          Lower Level Objective:  \max_{\phi} $L(\phi, \theta) = \max_{\phi} \mathbb{E}_{\substack{x \sim \mathcal{D}, \, y_0 \sim \pi^L_\theta(\cdot \mid x) , z \sim \pi^H_\phi(\cdot \mid x, y_0) , y_1 \sim \pi^L_{\theta}(\cdot \mid x, y_0, z)}} \left[ R(x, y_1) \right]$.
         </div>
 
       </div>
